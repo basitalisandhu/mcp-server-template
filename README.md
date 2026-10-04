@@ -2,7 +2,7 @@
 
 Secure MCP server template in TypeScript and Python: a starting point for a Model Context Protocol server that is safe by default. Both reference implementations ship the same four read-only tools and the same controls: strict input validation, file access bounded to allowlisted directories, network access bounded to allowlisted hosts with SSRF protection, structured logs that redact secrets, a health tool, stdio transport by default, and an optional streamable HTTP transport that is bound to 127.0.0.1, requires a bearer token, rate-limits clients and caps request bodies. Tests, Dockerfiles with digest-pinned bases and non-root users, CI with Semgrep, gitleaks and CodeQL, and SBOMs on release are included.
 
-Part of [Hisar](https://github.com/basitalisandhu/hisar) ([docs](https://basitalisandhu.github.io/hisar/)), open-source trust infrastructure for AI agents: who they are, what they may touch, and proof of what they did.
+Part of [Masoon](https://github.com/basitalisandhu/masoon) ([docs](https://basitalisandhu.github.io/masoon/)), open-source trust infrastructure for AI agents: who they are, what they may touch, and proof of what they did.
 
 [![CI](https://github.com/basitalisandhu/mcp-server-template/actions/workflows/ci.yml/badge.svg)](https://github.com/basitalisandhu/mcp-server-template/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -147,8 +147,8 @@ Issues and pull requests are welcome; the starter list is in [docs/good-first-is
 
 ## Sibling projects
 
-- [hisar](https://github.com/basitalisandhu/hisar): the platform front door, with the [docs site](https://basitalisandhu.github.io/hisar/).
-- [hisar-broker](https://basitalisandhu.github.io/hisar/hisar-broker.html): scoped, short-lived credentials for AI agents with approvals, kill switch and tamper-evident audit.
+- [masoon](https://github.com/basitalisandhu/masoon): the platform front door, with the [docs site](https://basitalisandhu.github.io/masoon/).
+- [Masoon Broker](https://basitalisandhu.github.io/masoon/masoon-broker.html): scoped, short-lived credentials for AI agents with approvals, kill switch and tamper-evident audit.
 - [llm-agent-control-plane](https://github.com/basitalisandhu/llm-agent-control-plane): deterministic policy enforcement point for LLM agents.
 - [agentic-semgrep-rules](https://github.com/basitalisandhu/agentic-semgrep-rules): the Semgrep rule pack this template is checked with.
 - [agent-config-audit](https://github.com/basitalisandhu/agent-config-audit): audit the agent configuration that launches servers like this one.

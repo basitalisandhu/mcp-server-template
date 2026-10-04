@@ -28,7 +28,7 @@ An MCP server is a process that an AI agent can call with model-chosen arguments
 ### What it does not protect against
 
 - A malicious or compromised client. The server trusts whoever holds the token.
-- Prompt injection inside the content the tools return. The server returns data faithfully; the client and the model must treat it as untrusted. Pair the server with a policy layer such as [llm-agent-control-plane](https://github.com/basitalisandhu/llm-agent-control-plane) or a credential broker such as [hisar-broker](https://basitalisandhu.github.io/hisar/hisar-broker.html) when the agent can act on what it reads.
+- Prompt injection inside the content the tools return. The server returns data faithfully; the client and the model must treat it as untrusted. Pair the server with a policy layer such as [llm-agent-control-plane](https://github.com/basitalisandhu/llm-agent-control-plane) or a credential broker such as [Masoon Broker](https://basitalisandhu.github.io/masoon/masoon-broker.html) when the agent can act on what it reads.
 - TLS. The HTTP transport speaks plain HTTP on loopback; put a reverse proxy with TLS in front of it before exposing it beyond the host, and keep `MCP_HOST` on loopback behind that proxy.
 - OAuth flows. The bearer check is a shared token; swap `SharedTokenVerifier` for a JWT or introspection verifier when the server is multi-tenant.
 
