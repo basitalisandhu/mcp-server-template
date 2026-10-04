@@ -1,0 +1,43 @@
+{
+  "name": "secure-mcp-server",
+  "version": "0.1.0",
+  "description": "Secure MCP server template (TypeScript): stdio by default, optional streamable HTTP behind bearer auth, rate limit and request size limit, bound to 127.0.0.1.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "secure-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "start:http": "MCP_TRANSPORT=http node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "express": "^5.2.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.0"
+  },
+  "license": "MIT",
+  "author": "Muhammad Basit Ali",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/basitalisandhu/mcp-server-template"
+  }
+}
