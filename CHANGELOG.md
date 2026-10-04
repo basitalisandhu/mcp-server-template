@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.1.1] - 2026-10-06
+
 ### Changed
 
 - Removed the umbrella branding; this project stands alone and links its sibling repositories directly.
@@ -21,5 +25,6 @@ All notable changes to this project are documented here. The format follows
 - Tests for both implementations, Dockerfiles with digest-pinned bases and non-root users, CI with build, test, Semgrep (agentic-semgrep-rules), gitleaks and CodeQL gated on public visibility, release workflow with SBOMs.
 - SECURITY.md with the threat model and the mapping to agentic-semgrep-rules.
 
-[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/basitalisandhu/mcp-server-template/releases/tag/v0.1.0

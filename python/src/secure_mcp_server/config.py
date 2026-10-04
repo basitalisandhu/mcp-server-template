@@ -46,7 +46,7 @@ def _bool(env: Mapping[str, str], key: str, default: bool) -> bool:
 @dataclass(frozen=True)
 class Settings:
     server_name: str = "secure-mcp-server"
-    server_version: str = "0.1.0"
+    server_version: str = "0.1.1"
     transport: str = "stdio"
     host: str = "127.0.0.1"
     port: int = 3000
@@ -79,7 +79,7 @@ class Settings:
             raise SettingsError(f"LOG_LEVEL must be one of {', '.join(LOG_LEVELS)}")
         return cls(
             server_name=env.get("MCP_SERVER_NAME", "secure-mcp-server"),
-            server_version=env.get("MCP_SERVER_VERSION", "0.1.0"),
+            server_version=env.get("MCP_SERVER_VERSION", "0.1.1"),
             transport=transport,
             host=env.get("MCP_HOST", "127.0.0.1"),
             port=_int(env, "MCP_PORT", 3000, 0, 65535),

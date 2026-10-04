@@ -106,7 +106,7 @@ Everything is an environment variable; the defaults are the safe ones.
 | `MCP_MAX_BODY_BYTES` | `1000000` | Request body cap on the HTTP transport. |
 | `MCP_RATE_LIMIT_PER_MINUTE` | `120` | Requests per minute per client on the HTTP transport. |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`/`warning`, `error`. |
-| `MCP_SERVER_NAME`, `MCP_SERVER_VERSION` | `secure-mcp-server`, `0.1.0` | Reported in `initialize` and by `health`. |
+| `MCP_SERVER_NAME`, `MCP_SERVER_VERSION` | `secure-mcp-server`, `0.1.1` | Reported in `initialize` and by `health`. |
 
 ## Tools
 

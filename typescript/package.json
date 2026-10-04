@@ -1,6 +1,6 @@
 {
   "name": "secure-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Secure MCP server template (TypeScript): stdio by default, optional streamable HTTP behind bearer auth, rate limit and request size limit, bound to 127.0.0.1.",
   "type": "module",
   "main": "dist/index.js",
