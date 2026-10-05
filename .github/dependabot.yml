@@ -18,10 +18,18 @@ updates:
     directory: /typescript
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: docker
     directory: /python
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
