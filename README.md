@@ -90,23 +90,32 @@ Without the header the endpoint answers 401 with a `WWW-Authenticate: Bearer` ch
 
 Everything is an environment variable; the defaults are the safe ones.
 
+<!-- env-table:start -->
+
 | Variable | Default | Meaning |
 |---|---|---|
-| `MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
-| `MCP_HOST` | `127.0.0.1` | Bind address for the HTTP transport. |
-| `MCP_PORT` | `3000` | Port for the HTTP transport. |
-| `MCP_AUTH_TOKEN` | unset | Shared bearer token; required for `http`, minimum 32 characters. |
-| `MCP_ALLOWED_HTTP_HOSTS` | loopback names | Host header values accepted by the HTTP transport (set when binding beyond loopback behind a proxy). |
-| `MCP_ALLOWED_DIRS` | empty (file tools disabled) | Comma-separated directories `read_file` and `list_directory` may read. |
-| `MCP_ALLOWED_HOSTS` | empty (fetch disabled) | Comma-separated hosts (`host` or `host:port`) `fetch_url` may contact. |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`/`warning`, `error`. |
+| `MCP_ALLOWED_DIRS` | empty | Comma-separated directories `read_file` and `list_directory` may read; empty disables file tools. |
+| `MCP_ALLOWED_HOSTS` | empty | Comma-separated hosts (`host` or `host:port`) `fetch_url` may contact; empty disables fetch. |
+| `MCP_ALLOWED_HTTP_HOSTS` | empty | Host header allowlist; empty uses loopback names. |
 | `MCP_ALLOW_PRIVATE_NETWORKS` | `false` | Let `fetch_url` reach loopback and private ranges. |
+| `MCP_AUTH_TOKEN` | unset | Shared bearer token; required for `http`, minimum 32 characters. |
+| `MCP_FETCH_TIMEOUT_MS` | `10000` | Timeout for `fetch_url`, in milliseconds. |
+| `MCP_HOST` | `127.0.0.1` | Bind address for the HTTP transport. |
+| `MCP_MAX_BODY_BYTES` | `1000000` | Request body cap on the HTTP transport. |
 | `MCP_MAX_FILE_BYTES` | `1000000` | Largest file `read_file` returns. |
 | `MCP_MAX_RESPONSE_BYTES` | `1000000` | Largest response `fetch_url` keeps (longer bodies are truncated and flagged). |
-| `MCP_FETCH_TIMEOUT_MS` | `10000` | Timeout for `fetch_url`. |
-| `MCP_MAX_BODY_BYTES` | `1000000` | Request body cap on the HTTP transport. |
+| `MCP_PORT` | `3000` | Port for the HTTP transport. |
 | `MCP_RATE_LIMIT_PER_MINUTE` | `120` | Requests per minute per client on the HTTP transport. |
-| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`/`warning`, `error`. |
-| `MCP_SERVER_NAME`, `MCP_SERVER_VERSION` | `secure-mcp-server`, `0.1.1` | Reported in `initialize` and by `health`. |
+| `MCP_SERVER_NAME` | `secure-mcp-server` | Server name reported in `initialize` and by `health`. |
+| `MCP_SERVER_VERSION` | `0.1.1` | Server version reported in `initialize` and by `health`. |
+| `MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
+
+<!-- env-table:end -->
+
+Regenerate this table with `python scripts/gen_env_table.py`; CI runs
+`python scripts/gen_env_table.py --check` to detect stale documentation or
+different variable names between the implementations.
 
 ## Tools
 
