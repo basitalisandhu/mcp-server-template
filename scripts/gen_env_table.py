@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
 """Generate the README configuration table from both implementations.
 
 Run without arguments to update the marker-delimited table, or with --check to
 fail without writing when documentation is stale. Standard library only.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,12 +40,18 @@ def python_names(source: str) -> set[str]:
         if not isinstance(node, ast.Call):
             continue
         args = node.args
-        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+        if isinstance(node.func, ast.Attribute) and isinstance(
+            node.func.value, ast.Name
+        ):
             if node.func.value.id == "env" and node.func.attr == "get" and args:
                 key = args[0]
             else:
                 continue
-        elif isinstance(node.func, ast.Name) and node.func.id in {"_int", "_list", "_bool"}:
+        elif isinstance(node.func, ast.Name) and node.func.id in {
+            "_int",
+            "_list",
+            "_bool",
+        }:
             if len(args) < 2:
                 continue
             key = args[1]
@@ -58,23 +64,43 @@ def python_names(source: str) -> set[str]:
 
 def typescript_defaults(source: str) -> dict[str, str]:
     defaults = {}
-    for match in re.finditer(r'env\["([A-Z_]+)"\](?:\s*\?\?\s*("[^"]*"|true|false|[\d_]+))?', source):
+    for match in re.finditer(
+        r'env\["([A-Z_]+)"\](?:\s*\?\?\s*("[^"]*"|true|false|[\d_]+))?', source
+    ):
         key, default = match.groups()
         defaults[key] = f"`{default.strip(chr(34))}`" if default else "unset"
-    for match in re.finditer(r'(intFrom|boolFrom|listFrom)\(env,\s*"([A-Z_]+)"(?:,\s*("[^"]*"|true|false|[\d_]+))?', source):
+    for match in re.finditer(
+        r'(intFrom|boolFrom|listFrom)\(env,\s*"([A-Z_]+)"(?:,\s*("[^"]*"|true|false|[\d_]+))?',
+        source,
+    ):
         helper, key, default = match.groups()
-        defaults[key] = "empty" if helper == "listFrom" else f"`{default.replace('_', '').strip(chr(34))}`"
+        defaults[key] = (
+            "empty"
+            if helper == "listFrom"
+            else f"`{default.replace('_', '').strip(chr(34))}`"
+        )
     return defaults
 
 
 def table(root: Path = ROOT) -> str:
-    ts = typescript_defaults((root / "typescript/src/config.ts").read_text(encoding="utf-8"))
-    py = python_names((root / "python/src/secure_mcp_server/config.py").read_text(encoding="utf-8"))
+    ts = typescript_defaults(
+        (root / "typescript/src/config.ts").read_text(encoding="utf-8")
+    )
+    py = python_names(
+        (root / "python/src/secure_mcp_server/config.py").read_text(encoding="utf-8")
+    )
     if set(ts) != py:
-        raise ValueError(f"environment variables differ: TypeScript only {sorted(set(ts) - py)}; Python only {sorted(py - set(ts))}")
+        raise ValueError(
+            f"environment variables differ: TypeScript only {sorted(set(ts) - py)}; Python only {sorted(py - set(ts))}"
+        )
+    missing = set(ts) - MEANINGS.keys()
+    if missing:
+        raise ValueError(
+            f"missing meanings for environment variables: {sorted(missing)}"
+        )
     lines = ["| Variable | Default | Meaning |", "|---|---|---|"]
     for key, default in sorted(ts.items()):
-        lines.append(f"| `{key}` | {default} | {MEANINGS.get(key, 'See the config modules.')} |")
+        lines.append(f"| `{key}` | {default} | {MEANINGS[key]} |")
     return "\n".join(lines)
 
 
@@ -86,8 +112,14 @@ def main(argv: list[str] | None = None) -> int:
     text = readme.read_text(encoding="utf-8")
     try:
         generated = table()
-        if text.count(START) != 1 or text.count(END) != 1 or text.index(START) > text.index(END):
-            raise ValueError("README must contain one ordered pair of environment-table markers")
+        if (
+            text.count(START) != 1
+            or text.count(END) != 1
+            or text.index(START) > text.index(END)
+        ):
+            raise ValueError(
+                "README must contain one ordered pair of environment-table markers"
+            )
         before, rest = text.split(START)
         _, after = rest.split(END)
         updated = before + START + "\n\n" + generated + "\n\n" + END + after
