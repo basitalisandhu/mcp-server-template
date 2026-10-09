@@ -108,7 +108,7 @@ Everything is an environment variable; the defaults are the safe ones.
 | `MCP_PORT` | `3000` | Port for the HTTP transport. |
 | `MCP_RATE_LIMIT_PER_MINUTE` | `120` | Requests per minute per client on the HTTP transport. |
 | `MCP_SERVER_NAME` | `secure-mcp-server` | Server name reported in `initialize` and by `health`. |
-| `MCP_SERVER_VERSION` | `0.1.1` | Server version reported in `initialize` and by `health`. |
+| `MCP_SERVER_VERSION` | `0.2.0` | Server version reported in `initialize` and by `health`. |
 | `MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
 
 <!-- env-table:end -->

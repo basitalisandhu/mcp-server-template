@@ -83,7 +83,7 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
   }
   return {
     serverName: env["MCP_SERVER_NAME"] ?? "secure-mcp-server",
-    serverVersion: env["MCP_SERVER_VERSION"] ?? "0.1.1",
+    serverVersion: env["MCP_SERVER_VERSION"] ?? "0.2.0",
     transport,
     host,
     port: intFrom(env, "MCP_PORT", 3000, 0, 65535),
