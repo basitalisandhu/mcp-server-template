@@ -43,6 +43,9 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install -e ".[dev]"
+      - name: Configuration documentation is current
+        run: python scripts/gen_env_table.py --check
+        working-directory: .
       - run: ruff check . && ruff format --check .
       - run: python -m pytest -q
       - name: Container image builds and runs as non-root
