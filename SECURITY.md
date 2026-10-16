@@ -2,6 +2,8 @@
 
 ## Reporting a vulnerability
 
+Report a vulnerability privately: <https://github.com/basitalisandhu/mcp-server-template/security/advisories/new>
+
 Please use GitHub's private vulnerability reporting on this repository (Security tab, "Report a vulnerability") rather than a public issue. Include the implementation (TypeScript or Python), the transport, the configuration (redacted) and a minimal reproduction.
 
 You will get an acknowledgement within 7 days and a fix or a mitigation plan within 30 days for confirmed issues. Credit is given in the release notes unless you prefer otherwise.
