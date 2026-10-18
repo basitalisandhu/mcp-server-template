@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-18
+
+### Changed
+
+- Dependency updates: the MCP SDK, the Python base image (3.14-slim) and the GitHub Actions group.
+- Harden the workflows and repository policy for the OpenSSF Scorecard (#29).
+
 ## [0.2.0] - 2026-10-09
 
 ### Added
@@ -33,7 +40,8 @@ All notable changes to this project are documented here. The format follows
 - Tests for both implementations, Dockerfiles with digest-pinned bases and non-root users, CI with build, test, Semgrep (agentic-semgrep-rules), gitleaks and CodeQL gated on public visibility, release workflow with SBOMs.
 - SECURITY.md with the threat model and the mapping to agentic-semgrep-rules.
 
-[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/basitalisandhu/mcp-server-template/releases/tag/v0.1.0
