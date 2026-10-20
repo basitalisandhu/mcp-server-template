@@ -34,7 +34,7 @@ Most MCP servers are written in an afternoon and then given to an agent that rea
 | Tools | `health`, `read_file`, `list_directory`, `fetch_url` | the same four |
 | File boundary | `resolveInside` (realpath, symlink-safe, allowlisted roots, size cap) | `safe_join` (resolve, symlink-safe, allowlisted roots, size cap) |
 | Network boundary | `assertSafeUrl` and `fetchBounded` (host allowlist, private ranges blocked, no redirects, size and time caps) | `validate_url` and `fetch_bounded` (same policy) |
-| Logging | JSON lines on stderr, `redact` on every field | JSON lines on stderr, `redact` on every field |
+| Logging | JSON lines on stderr, `redact` on every field, one `audit` entry per tool call (wrapper in `audit.ts`) | JSON lines on stderr, `redact` on every field, one `audit` entry per tool call (FastMCP middleware in `audit.py`) |
 | Tests | vitest: in-memory client, real HTTP server, local fetch target | pytest: in-memory client, uvicorn server, mocked HTTP transport |
 | Container | `node:22-alpine` pinned by digest, runs as `node` | `python:3.14-slim` pinned by digest, runs as `mcp` |
 
@@ -125,6 +125,15 @@ different variable names between the implementations.
 | `read_file` | `path` (1 to 4096 characters) | Paths outside `MCP_ALLOWED_DIRS` (including through symlinks), non-files, files over the cap, null bytes. |
 | `list_directory` | `path` | Same boundary; returns at most 1000 entries with names and types. |
 | `fetch_url` | `url` (http or https, up to 2048 characters) | Hosts not in `MCP_ALLOWED_HOSTS`, non-http schemes, credentials in the URL, private and loopback addresses, redirects (returned as-is, not followed), bodies over the cap, slow responses. |
+
+Every call writes one `audit` log entry in the same shape in both implementations. Two real entries from the Python server, an allowed `read_file` and a refused one (the directory path is shortened):
+
+```json
+{"ts": "2026-10-20T09:18:14.576+00:00", "level": "info", "logger": "secure_mcp_server.audit", "msg": "audit", "event": "audit", "tool": "read_file", "outcome": "ok", "duration_ms": 3, "client_id": null, "target": ".../srv-docs/README.md"}
+{"ts": "2026-10-20T09:18:14.654+00:00", "level": "info", "logger": "secure_mcp_server.audit", "msg": "audit", "event": "audit", "tool": "read_file", "outcome": "refused", "duration_ms": 2, "client_id": null, "target": null}
+```
+
+`outcome` is `ok`, `refused` (the tool declined: outside the allowed directories, host not allowed, not found, too large) or `error` (an unexpected failure). `client_id` is the bearer token's client on the HTTP transport and `null` on stdio. `target` is the resolved real path, or the host for `fetch_url`, and is `null` for refused calls; argument values, file contents and response bodies are never logged.
 
 Descriptions are fixed literals in the source and every tool carries `readOnlyHint: true`; see [docs/adding-a-tool.md](docs/adding-a-tool.md) before adding one that writes.
 

@@ -15,6 +15,7 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from pydantic import Field
 
+from .audit import AuditMiddleware
 from .config import Settings
 from .logging import get_logger
 from .safety.network import NetworkPolicy, UrlDenied, fetch_bounded, validate_url
@@ -33,6 +34,8 @@ log = get_logger("secure_mcp_server.tools")
 def register_tools(
     mcp: FastMCP, settings: Settings, http_client: httpx.AsyncClient | None = None
 ) -> None:
+    # Every tool call passes this middleware once, so each call writes exactly one audit entry.
+    mcp.add_middleware(AuditMiddleware())
     policy = NetworkPolicy(
         allowed_hosts=settings.allowed_hosts,
         allow_private_networks=settings.allow_private_networks,
