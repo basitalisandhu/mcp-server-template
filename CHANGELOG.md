@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Structured audit log: every tool call writes exactly one `audit` entry with `tool`, `outcome` (`ok`, `refused`, `error`), `duration_ms`, `client_id` (the bearer client on the HTTP transport) and the resolved `target` (real path, or host for `fetch_url`), never argument values or content. One wrapper in TypeScript (`src/audit.ts`), one FastMCP middleware in Python (`audit.py`), with tests for allowed, refused and failed calls and for the client id over HTTP (#13).
+
 ### Fixed
 
 - TypeScript `resolveInside` refused an absolute path spelt through the configured root when that root is reached through a symlink (for example `MCP_ALLOWED_DIRS=/tmp/docs` on macOS, where `/tmp` points to `/private/tmp`), so `read_file` and `list_directory` denied files that were inside the allowed directory. It now compares real paths only, as the Python implementation already did; both have a test for the case.

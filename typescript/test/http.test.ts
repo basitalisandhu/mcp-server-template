@@ -81,6 +81,7 @@ describe("http transport", () => {
     const health = await client.callTool({ name: "health", arguments: {} });
     expect((health.structuredContent as { transport: string }).transport).toBe("http");
     await client.close();
+    expect(lines.some((l) => l.includes('"event":"audit"') && l.includes('"client_id":"shared-token"'))).toBe(true);
     expect(lines.some((l) => l.includes(TEST_TOKEN))).toBe(false);
   });
 

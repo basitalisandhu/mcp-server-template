@@ -9,7 +9,7 @@ The four bundled tools are read-only on purpose. When a project needs a tool tha
 3. **Annotations that tell the truth.** `readOnlyHint: false` and `destructiveHint: true` for anything that writes, deletes or sends. Clients use these to decide when to ask the user.
 4. **Bounded effect.** Resolve paths with `resolveInside` / `safe_join`; validate URLs with `assertSafeUrl` / `validate_url`; cap sizes and time; never pass a model-chosen string to a shell. If the tool needs a credential, read it from the environment inside the server and never accept it as an argument.
 5. **Approval outside the model.** For high-impact actions (payments, deletions, messages to third parties), require an approval that the model cannot grant itself: a credential broker, a policy layer, or a client-side confirmation.
-6. **Log the decision, not the secret.** Log the resolved target and the outcome through the provided logger; it redacts, but do not rely on it for values you know are secrets.
+6. **Log the decision, not the secret.** Every call already gets one `audit` entry (tool, outcome, duration, client id, resolved target) from the wrapper in `typescript/src/audit.ts` and the middleware in `python/src/secure_mcp_server/audit.py`; you do not add it per tool. For the target to appear, return the resolved `path` or the `url` in the structured output. Log anything else through the provided logger; it redacts, but do not rely on it for values you know are secrets.
 7. **Tests for the refusals.** Every tool test covers the allowed case and at least one refused case (outside the root, host not on the allowlist, oversize input).
 8. **Semgrep stays clean.** Run the rule pack. A finding on a new tool is a design review, not a false positive to suppress.
 

@@ -117,6 +117,27 @@ async def test_full_session_with_the_right_token(base: str):
         assert notes.data["content"] == "hello"
 
 
+async def test_audit_entries_carry_the_client_id_over_http(base: str):
+    import io
+    import json
+
+    from secure_mcp_server.logging import configure_logging
+
+    stream = io.StringIO()
+    configure_logging("info", stream)
+    try:
+        async with Client(f"{base}/mcp", auth=TEST_TOKEN) as client:
+            await client.call_tool("health", {})
+    finally:
+        configure_logging("info")
+    lines = [json.loads(line) for line in stream.getvalue().splitlines() if line]
+    audit = [e for e in lines if e.get("event") == "audit"]
+    assert [(e["tool"], e["outcome"], e["client_id"]) for e in audit] == [
+        ("health", "ok", "shared-token")
+    ]
+    assert TEST_TOKEN not in stream.getvalue()
+
+
 async def test_rate_limit_is_enforced(limited_base: str):
     errors: list[str] = []
     async with Client(f"{limited_base}/mcp", auth=TEST_TOKEN) as client:

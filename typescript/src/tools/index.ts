@@ -14,6 +14,7 @@ import type { Settings } from "../config.js";
 import type { Logger } from "../logger.js";
 import { PathDeniedError, readBounded, resolveInside } from "../safety/paths.js";
 import { assertSafeUrl, fetchBounded, UrlDeniedError, type NetworkPolicy } from "../safety/network.js";
+import { audited, markInternalError } from "../audit.js";
 
 const startedAt = Date.now();
 
@@ -30,11 +31,16 @@ function errorResult(message: string) {
 function toolError(err: unknown): ReturnType<typeof errorResult> {
   if (err instanceof PathDeniedError || err instanceof UrlDeniedError) return errorResult(err.message);
   if (err instanceof Error && (err as NodeJS.ErrnoException).code === "ENOENT") return errorResult("not found");
-  return errorResult("internal error");
+  return markInternalError(errorResult("internal error"));
 }
 
-export function registerTools(server: McpServer, deps: ToolDeps): void {
+export function registerTools(mcpServer: McpServer, deps: ToolDeps): void {
   const { settings, log } = deps;
+  // Every handler is wrapped once here, so each call writes exactly one audit entry.
+  const server = {
+    registerTool: ((name: string, config: unknown, handler: Parameters<McpServer["registerTool"]>[2]) =>
+      mcpServer.registerTool(name, config as never, audited(name, log, handler as never))) as McpServer["registerTool"],
+  };
   const policy: NetworkPolicy = {
     allowedHosts: settings.allowedHosts,
     allowPrivateNetworks: settings.allowPrivateNetworks,
