@@ -33,8 +33,9 @@ export async function resolveInside(allowedRoots: readonly string[], requested: 
     const realRoot = await fs.realpath(path.resolve(root)).catch(() => null);
     if (realRoot === null) continue;
     const candidate = path.isAbsolute(requested) ? path.resolve(requested) : path.resolve(realRoot, requested);
-    if (!isInside(realRoot, candidate)) continue;
-    // Resolve symlinks on the deepest existing ancestor so a link cannot point outside the root.
+    // Compare real paths only. Resolve symlinks on the deepest existing ancestor so a link cannot
+    // point outside the root, and so an absolute path spelt through the configured root (which may
+    // itself be a symlink, such as /tmp or /var on macOS) is still recognised as inside it.
     const real = await realpathDeep(candidate);
     if (isInside(realRoot, real)) return real;
   }

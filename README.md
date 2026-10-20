@@ -35,8 +35,8 @@ Most MCP servers are written in an afternoon and then given to an agent that rea
 | File boundary | `resolveInside` (realpath, symlink-safe, allowlisted roots, size cap) | `safe_join` (resolve, symlink-safe, allowlisted roots, size cap) |
 | Network boundary | `assertSafeUrl` and `fetchBounded` (host allowlist, private ranges blocked, no redirects, size and time caps) | `validate_url` and `fetch_bounded` (same policy) |
 | Logging | JSON lines on stderr, `redact` on every field | JSON lines on stderr, `redact` on every field |
-| Tests | vitest: 6 files, 33 tests, in-memory client, real HTTP server, local fetch target | pytest: 6 files, 30 tests, in-memory client, uvicorn server, mocked HTTP transport |
-| Container | `node:22-alpine` pinned by digest, runs as `node` | `python:3.12-slim` pinned by digest, runs as `mcp` |
+| Tests | vitest: in-memory client, real HTTP server, local fetch target | pytest: in-memory client, uvicorn server, mocked HTTP transport |
+| Container | `node:22-alpine` pinned by digest, runs as `node` | `python:3.14-slim` pinned by digest, runs as `mcp` |
 
 ## Quickstart
 

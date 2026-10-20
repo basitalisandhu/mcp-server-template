@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
-# Base image pinned by digest (python:3.12-slim, multi-arch manifest list, resolved on 2026-10-03).
-# Update the tag and digest together: docker buildx imagetools inspect python:3.12-slim
+# Base image pinned by digest (python:3.14-slim, multi-arch manifest list, resolved on 2026-10-03).
+# Update the tag and digest together: docker buildx imagetools inspect python:3.14-slim
 FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170 AS build
 WORKDIR /app
 COPY pyproject.toml README.md ./

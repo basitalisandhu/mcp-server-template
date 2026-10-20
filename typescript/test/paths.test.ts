@@ -42,6 +42,16 @@ describe("resolveInside", () => {
     await expect(resolveInside([root], "dir-out/secret.txt")).rejects.toBeInstanceOf(PathDeniedError);
   });
 
+  it("accepts absolute paths spelt through a symlinked root", async () => {
+    const alias = path.join(outside, "root-alias");
+    await fs.symlink(root, alias);
+    const real = await fs.realpath(path.join(root, "sub", "a.txt"));
+    expect(await resolveInside([alias], path.join(alias, "sub", "a.txt"))).toBe(real);
+    expect(await resolveInside([alias], "sub/a.txt")).toBe(real);
+    await expect(resolveInside([alias], path.join(alias, "link-out"))).rejects.toBeInstanceOf(PathDeniedError);
+    await expect(resolveInside([alias], path.join(alias, "..", "secret.txt"))).rejects.toBeInstanceOf(PathDeniedError);
+  });
+
   it("resolves a path that does not exist yet inside the root", async () => {
     const resolved = await resolveInside([root], "sub/new.txt");
     expect(resolved.startsWith(await fs.realpath(root))).toBe(true);
