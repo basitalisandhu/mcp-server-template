@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
 ### Added
 
 - Structured audit log: every tool call writes exactly one `audit` entry with `tool`, `outcome` (`ok`, `refused`, `error`), `duration_ms`, `client_id` (the bearer client on the HTTP transport) and the resolved `target` (real path, or host for `fetch_url`), never argument values or content. One wrapper in TypeScript (`src/audit.ts`), one FastMCP middleware in Python (`audit.py`), with tests for allowed, refused and failed calls and for the client id over HTTP (#13).
@@ -50,7 +52,8 @@ All notable changes to this project are documented here. The format follows
 - Tests for both implementations, Dockerfiles with digest-pinned bases and non-root users, CI with build, test, Semgrep (agentic-semgrep-rules), gitleaks and CodeQL gated on public visibility, release workflow with SBOMs.
 - SECURITY.md with the threat model and the mapping to agentic-semgrep-rules.
 
-[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/basitalisandhu/mcp-server-template/compare/v0.1.0...v0.1.1
