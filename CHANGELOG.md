@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- TypeScript `resolveInside` refused an absolute path spelt through the configured root when that root is reached through a symlink (for example `MCP_ALLOWED_DIRS=/tmp/docs` on macOS, where `/tmp` points to `/private/tmp`), so `read_file` and `list_directory` denied files that were inside the allowed directory. It now compares real paths only, as the Python implementation already did; both have a test for the case.
+- Python: the dev dependencies move from the deprecated `tool.uv.dev-dependencies` to `[dependency-groups]`, so `uv sync` no longer prints a deprecation warning.
+- README and the Python Dockerfile comment named `python:3.12-slim`; the image has been `python:3.14-slim` since 0.2.1.
+
 ## [0.2.1] - 2026-10-18
 
 ### Changed
