@@ -30,8 +30,9 @@ SECRET_VALUE_PATTERNS = [
     re.compile(r"\bnpm_[A-Za-z0-9]{36}\b"),
     re.compile(r"\bhf_[A-Za-z0-9]{30,}\b"),
     re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b"),
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----", re.S),
 ]
+_PEM_BEGIN = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")
+_PEM_END = re.compile(r"-----END [A-Z ]*PRIVATE KEY-----")
 _BEARER_RE = re.compile(r"(\b(?:bearer|basic|token)\s+)[A-Za-z0-9._~+/=-]{12,}", re.I)
 _STANDARD_ATTRS = set(logging.LogRecord("x", 0, "", 0, "", (), None).__dict__) | {
     "message",
@@ -39,7 +40,30 @@ _STANDARD_ATTRS = set(logging.LogRecord("x", 0, "", 0, "", (), None).__dict__) |
 }
 
 
+def _redact_pem(value: str) -> str:
+    """Mask each PEM private key block, from a BEGIN line to the first END line after it.
+
+    The regular expression this replaces (BEGIN, then a lazy match up to END) rescanned the
+    rest of the text from every BEGIN marker, so a log value with many BEGIN markers and no
+    END took seconds (20,000 markers: about 30 s). Searching for END once per block and
+    stopping when there is none is linear.
+    """
+    out: list[str] = []
+    pos = 0
+    while (begin := _PEM_BEGIN.search(value, pos)) is not None:
+        end = _PEM_END.search(value, begin.end())
+        if end is None:
+            break
+        out += [value[pos : begin.start()], REDACTED]
+        pos = end.end()
+    if not out:
+        return value
+    out.append(value[pos:])
+    return "".join(out)
+
+
 def redact_text(value: str) -> str:
+    value = _redact_pem(value)
     for pattern in SECRET_VALUE_PATTERNS:
         value = pattern.sub(REDACTED, value)
     return _BEARER_RE.sub(lambda m: m.group(1) + REDACTED, value)

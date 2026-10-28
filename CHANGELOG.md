@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-28
+
+### Security
+
+- The TypeScript and Python private-address checks now agree, tested against one shared table (`test-cases/private-addresses.json`). Python treated `127.1`, `0x7f.1`, `0177.0.0.1` and `2130706433` as public (the HTTP client still connects them to 127.0.0.1); TypeScript treated `febf::1`, multicast, NAT64 (`64:ff9b::7f00:1`), documentation and benchmark ranges as public. Both now treat a trailing dot (`localhost.`) as the same host, all IPv4-mapped and NAT64 IPv6 as private, and only global unicast IPv6 as public. Each address still has to be on `MCP_ALLOWED_HOSTS` first.
+- PEM private-key redaction in the log redactor was quadratic: a value with 20,000 `-----BEGIN ... PRIVATE KEY-----` markers and no END took about 30 s in Python and 2 s in TypeScript, on every log line that carried it (tool arguments are logged). It is now linear (0.03 s and 0.002 s).
+
+### Fixed
+
+- Python `fetch_url`: a URL with an unclosed IPv6 bracket or a port out of range raised `ValueError` instead of being refused; it is now `not a valid absolute URL`.
+- Python `read_file` and `list_directory` on 3.11 and 3.12: a symlink loop raised `RuntimeError` and a name too long for the file system `OSError`, both with the server's absolute path in the message; they are now `path cannot be resolved` and `file cannot be read`.
+
+### Added
+
+- Seeded fuzz tests in both implementations (`python/tests/test_fuzz.py`, `typescript/test/fuzz.test.ts`) for URLs, paths, settings and redaction, with scaling tests.
+- `scripts/e2e-quickstart.sh`: the README Quickstart on a fresh clone for both implementations (stdio tools through a real MCP client, and the HTTP transport's 401 and 200), run in CI.
+- README: Troubleshooting section with the real messages and their fixes.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added

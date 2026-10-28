@@ -20,11 +20,21 @@ export interface NetworkPolicy {
 }
 
 export function isPrivateAddress(host: string): boolean {
-  const h = host.toLowerCase().replace(/^\[|\]$/g, "");
+  // A trailing dot names the same host ("localhost." is localhost).
+  let h = host.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.+$/, "");
   if (h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") || h.endsWith(".internal")) return true;
+  if (isIP(h) === 0 && /^(?:0x[0-9a-f]+|[0-9]+)(?:\.(?:0x[0-9a-f]+|[0-9]+)){0,3}$/.test(h)) {
+    // 127.1, 0x7f.0.0.1 and 2130706433 all mean 127.0.0.1; the URL parser normalises them,
+    // so read them the same way when the host comes from anywhere else.
+    try {
+      h = new URL(`http://${h}/`).hostname;
+    } catch {
+      return false;
+    }
+  }
   const version = isIP(h);
   if (version === 4) {
-    const [a = 0, b = 0] = h.split(".").map((n) => Number.parseInt(n, 10));
+    const [a = 0, b = 0, c = 0] = h.split(".").map((n) => Number.parseInt(n, 10));
     return (
       a === 0 ||
       a === 10 ||
@@ -33,17 +43,25 @@ export function isPrivateAddress(host: string): boolean {
       (a === 172 && b >= 16 && b <= 31) ||
       (a === 192 && b === 168) ||
       (a === 100 && b >= 64 && b <= 127) ||
+      (a === 192 && b === 0 && (c === 0 || c === 2)) ||
+      (a === 198 && (b === 18 || b === 19)) ||
+      (a === 198 && b === 51 && c === 100) ||
+      (a === 203 && b === 0 && c === 113) ||
       a >= 224
     );
   }
   if (version === 6) {
+    // Compare the canonical form, so 0:0:0:0:0:0:0:1 is ::1.
+    const v6 = new URL(`http://[${h}]/`).hostname.slice(1, -1);
+    const [first = 0, second = 0] = v6.split(":").map((g) => (g === "" ? 0 : Number.parseInt(g, 16)));
     return (
-      h === "::" ||
-      h === "::1" ||
-      h.startsWith("fe80:") ||
-      h.startsWith("fc") ||
-      h.startsWith("fd") ||
-      h.startsWith("::ffff:")
+      // Only global unicast (2000::/3) can be public. Everything else is loopback,
+      // unspecified, IPv4-mapped, NAT64, unique local, link-local, multicast or reserved.
+      first < 0x2000 ||
+      first >= 0x4000 ||
+      (first === 0x2001 && second < 0x200) || // IETF protocol assignments, Teredo
+      (first === 0x2001 && second === 0xdb8) || // documentation
+      (first === 0x3fff && second < 0x1000) // documentation (3fff::/20)
     );
   }
   return false;

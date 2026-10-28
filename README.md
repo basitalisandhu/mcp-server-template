@@ -108,7 +108,7 @@ Everything is an environment variable; the defaults are the safe ones.
 | `MCP_PORT` | `3000` | Port for the HTTP transport. |
 | `MCP_RATE_LIMIT_PER_MINUTE` | `120` | Requests per minute per client on the HTTP transport. |
 | `MCP_SERVER_NAME` | `secure-mcp-server` | Server name reported in `initialize` and by `health`. |
-| `MCP_SERVER_VERSION` | `0.3.0` | Server version reported in `initialize` and by `health`. |
+| `MCP_SERVER_VERSION` | `0.3.1` | Server version reported in `initialize` and by `health`. |
 | `MCP_TRANSPORT` | `stdio` | `stdio` or `http`. |
 
 <!-- env-table:end -->
@@ -142,6 +142,24 @@ Descriptions are fixed literals in the source and every tool carries `readOnlyHi
 [SECURITY.md](SECURITY.md) holds the threat model (tool poisoning via descriptions, path traversal, SSRF, unauthenticated HTTP transport, secret leakage in logs, over-broad tools, resource exhaustion, supply chain), what the template does not cover, and the mapping of each control to the rules in [agentic-semgrep-rules](https://github.com/basitalisandhu/agentic-semgrep-rules), which CI runs against both implementations and which reports no findings on the template.
 
 CI (`.github/workflows/ci.yml`): build and test both implementations, build both images and check they run as non-root, Semgrep with the agentic rule pack, gitleaks, and CodeQL for TypeScript and Python when the repository is public. Release (`.github/workflows/release.yml`, on `v*` tags): images to GHCR with provenance, SPDX SBOMs for each image and each source tree attached to the GitHub release.
+
+## Troubleshooting
+
+Real messages and what to do about them.
+
+**`{"level":"error","msg":"MCP_AUTH_TOKEN must be set to at least 32 characters when MCP_TRANSPORT=http ..."}`** and the server exits. The HTTP transport refuses to start without a strong token. Generate one with `openssl rand -hex 32`, or leave `MCP_TRANSPORT` unset for stdio.
+
+**`MCP_PORT must be an integer between 0 and 65535`** (and the same for the other numeric settings). A setting is outside its range; the [Configuration](#configuration) table gives each range.
+
+**`file access is disabled: no allowed directories configured`** from `read_file` or `list_directory`. Set `MCP_ALLOWED_DIRS` to a comma-separated list of directories in the client's `env` block; nothing is readable by default.
+
+**`path is outside the allowed directories: ../README.md`.** Working as designed: paths, including symlinks, must resolve inside `MCP_ALLOWED_DIRS`. Add the directory if the client should see it. `path cannot be resolved` means a symlink loop or a name too long for the file system.
+
+**`network access is disabled: no allowed hosts configured`**, **`host not on the allowlist: example.com`** or **`private and loopback addresses are blocked`** from `fetch_url`. Add the host to `MCP_ALLOWED_HOSTS` (with `:port` if it is not the default). Private, loopback, link-local and other non-public addresses stay blocked even when listed, in every spelling (`127.1`, `2130706433`, `localhost.`, IPv4-mapped IPv6); set `MCP_ALLOW_PRIVATE_NETWORKS=true` only for a server that must reach an internal service.
+
+**HTTP answers 401, 403, 421, 413 or 429.** 401: the `Authorization: Bearer` header is missing or wrong. 403 (TypeScript) or 421 (Python): the `Host` header is not loopback; set `MCP_ALLOWED_HTTP_HOSTS` behind a reverse proxy. 413: the body is over `MCP_MAX_BODY_BYTES`. 429: over `MCP_RATE_LIMIT_PER_MINUTE`.
+
+**`uv: command not found`.** Use `pip install -e ".[dev]"` in a virtual environment instead, as the Python quickstart shows.
 
 ## Frequently asked questions
 

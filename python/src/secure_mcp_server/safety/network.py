@@ -8,6 +8,8 @@ size and time. These are the server-side request forgery (SSRF) controls.
 from __future__ import annotations
 
 import ipaddress
+import re
+import socket
 from dataclasses import dataclass
 from urllib.parse import SplitResult, urlsplit
 
@@ -26,14 +28,37 @@ class NetworkPolicy:
     timeout_seconds: float = 10.0
 
 
+_IPV4_SHORTHAND = re.compile(r"(?:0x[0-9a-f]+|[0-9]+)(?:\.(?:0x[0-9a-f]+|[0-9]+)){0,3}")
+_NAT64 = ipaddress.ip_network("64:ff9b::/96")
+
+
+def _ip(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    try:
+        return ipaddress.ip_address(host)
+    except ValueError:
+        pass
+    # 127.1, 0x7f.0.0.1, 0177.0.0.1 and 2130706433 all mean 127.0.0.1 to the resolver the
+    # HTTP client uses, but ipaddress rejects them; read them the way inet_aton does.
+    if _IPV4_SHORTHAND.fullmatch(host):
+        try:
+            return ipaddress.IPv4Address(socket.inet_aton(host))
+        except OSError:
+            return None
+    return None
+
+
 def is_private_address(host: str) -> bool:
-    h = host.lower().strip("[]")
+    # A trailing dot names the same host ("localhost." is localhost).
+    h = host.lower().strip("[]").rstrip(".")
     if h == "localhost" or h.endswith((".localhost", ".local", ".internal")):
         return True
-    try:
-        addr = ipaddress.ip_address(h)
-    except ValueError:
+    addr = _ip(h)
+    if addr is None:
         return False
+    if addr.version == 6 and (addr.ipv4_mapped is not None or addr in _NAT64):
+        # IPv4-mapped and NAT64 addresses reach an IPv4 host; refuse them all, as the
+        # TypeScript implementation does, rather than decode and re-check them.
+        return True
     return (
         addr.is_private
         or addr.is_loopback
@@ -41,6 +66,7 @@ def is_private_address(host: str) -> bool:
         or addr.is_multicast
         or addr.is_reserved
         or addr.is_unspecified
+        or (addr.version == 6 and addr.is_site_local)
         or (addr.version == 4 and addr in ipaddress.ip_network("100.64.0.0/10"))
     )
 
@@ -49,7 +75,12 @@ def validate_url(raw: str, policy: NetworkPolicy) -> SplitResult:
     """Validate a model-supplied URL against the policy and return the parsed URL."""
     if not policy.allowed_hosts:
         raise UrlDenied("network access is disabled: no allowed hosts configured")
-    parts = urlsplit(raw)
+    try:
+        parts = urlsplit(raw)
+        port = parts.port  # raises ValueError for a port that is not 0-65535
+    except ValueError:
+        # An unclosed IPv6 bracket or a bad port used to escape as ValueError.
+        raise UrlDenied("not a valid absolute URL") from None
     if parts.scheme not in {"http", "https"}:
         raise UrlDenied(f"scheme not allowed: {parts.scheme or 'none'}")
     if not parts.hostname:
@@ -57,7 +88,7 @@ def validate_url(raw: str, policy: NetworkPolicy) -> SplitResult:
     if parts.username or parts.password:
         raise UrlDenied("credentials in URLs are not allowed")
     hostname = parts.hostname.lower()
-    host_with_port = f"{hostname}:{parts.port}" if parts.port else hostname
+    host_with_port = f"{hostname}:{port}" if port else hostname
     if hostname not in policy.allowed_hosts and host_with_port not in policy.allowed_hosts:
         raise UrlDenied(f"host not on the allowlist: {hostname}")
     if not policy.allow_private_networks and is_private_address(hostname):
