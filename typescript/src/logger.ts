@@ -24,13 +24,38 @@ const SECRET_VALUE_PATTERNS: RegExp[] = [
   /\bhf_[A-Za-z0-9]{30,}\b/g,
   /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g,
   /(?<=\b(?:bearer|basic|token)\s+)[A-Za-z0-9._~+/=-]{12,}/gi,
-  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
 ];
+const PEM_BEGIN = /-----BEGIN [A-Z ]*PRIVATE KEY-----/g;
+const PEM_END = /-----END [A-Z ]*PRIVATE KEY-----/g;
 
 export const REDACTED = "[redacted]";
 
+/**
+ * Mask each PEM private key block, from a BEGIN line to the first END line after it. The
+ * regular expression this replaces (BEGIN, a lazy match, END) rescanned the rest of the
+ * text from every BEGIN marker, so many markers without an END took seconds; searching for
+ * END once per block and stopping when there is none is linear.
+ */
+function redactPem(value: string): string {
+  const parts: string[] = [];
+  let pos = 0;
+  for (;;) {
+    PEM_BEGIN.lastIndex = pos;
+    const begin = PEM_BEGIN.exec(value);
+    if (begin === null) break;
+    PEM_END.lastIndex = begin.index + begin[0].length;
+    const end = PEM_END.exec(value);
+    if (end === null) break;
+    parts.push(value.slice(pos, begin.index), REDACTED);
+    pos = end.index + end[0].length;
+  }
+  if (parts.length === 0) return value;
+  parts.push(value.slice(pos));
+  return parts.join("");
+}
+
 export function redactString(value: string): string {
-  let out = value;
+  let out = redactPem(value);
   for (const pattern of SECRET_VALUE_PATTERNS) {
     out = out.replace(pattern, REDACTED);
   }
